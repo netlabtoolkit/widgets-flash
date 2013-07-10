@@ -1,1 +1,3 @@
+*.as filter=cr
+*.as text=auto
 *.as eol=lf
