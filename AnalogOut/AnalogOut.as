@@ -29,7 +29,7 @@
 	 * GNU General Public License for more details.
 	 *
 	 * You should have received a copy of the GNU General Public License
-	 * along with NETLab Glash Widgets.  If not, see <http://www.gnu.org/licenses/>.
+	 * along with NETLab Flash Widgets.  If not, see <http://www.gnu.org/licenses/>.
 	 */
 	
 	public class AnalogOut extends WidgetOutputController { 
