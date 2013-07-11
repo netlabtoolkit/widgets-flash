@@ -253,7 +253,11 @@
 					// e.g. if the string is /acceleration/xyz 0.1 0.2 0.3 and controllerInputNum = 1, theValue will equal 0.2 for the second position
 					var dataPosition = controllerInputNum + 1;
 					if (dataSplit.length > dataPosition) theValue = dataSplit[dataPosition];
-					else theValue = dataSplit[1];
+					else if (dataSplit.length > 1) theValue = dataSplit[1];
+					else {
+						theValue = 0;
+						trace("NO DATA FROM DEVICE");
+					}
 					//trace("theValue: " + theValue);
 					if(theValue.indexOf("OK") < 0 && theValue.indexOf("FAIL") < 0) {
 						theValue *= multiplier;

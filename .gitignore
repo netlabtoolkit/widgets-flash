@@ -1,6 +1,7 @@
 *.swf
 *.png
 *.jpg
+*.gif
 *.xml
 *.txt
 *.flv
@@ -9,7 +10,7 @@
 *.f4v
 *.mp3
 *.m4a
-
+RECOVER*.fla
 
 # OS generated files #
 ######################
