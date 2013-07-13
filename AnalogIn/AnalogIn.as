@@ -189,8 +189,8 @@
 		//----------------------------------------------------------
 		// parameter getter setter functions
 		
-		private var _easeAmount:Number = 10;		
-		[Inspectable (name = "easeAmount", variable = "easeAmount", type = "Number", defaultValue = 10)]	
+		private var _easeAmount:Number = 15;		
+		[Inspectable (name = "easeAmount", variable = "easeAmount", type = "Number", defaultValue = 15)]	
 		public function get easeAmount():Number { return _easeAmount; }
 		public function set easeAmount(value:Number):void {
 			_easeAmount = value;

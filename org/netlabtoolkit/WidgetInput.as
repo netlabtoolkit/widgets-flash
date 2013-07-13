@@ -89,7 +89,7 @@
 			
 			// set up for an automated filling of the buffer if we don't receive any input from microcontroller
 			// provide half the specified sample rate to keep traffic down to a reasonable amount
-			smoothingTimerMsecs = Math.round(1/sampleRate * 1000 * 2); // set to milliseconds based on sampleRate
+			smoothingTimerMsecs = Math.round(1/sampleRate * 1000 * 0.5); // set to milliseconds based on sampleRate
 			smoothingTimer = new Timer(smoothingTimerMsecs, 1);
 			smoothingTimer.addEventListener(TimerEvent.TIMER, smoothingFillIn);
 
@@ -542,8 +542,8 @@
 			draw();
 		}
 		
-		private var _smoothAmount:Number = 7;		
-		[Inspectable (name = "smoothAmount", variable = "smoothAmount", type = "Number", defaultValue = 7)]	
+		private var _smoothAmount:Number = 15;		
+		[Inspectable (name = "smoothAmount", variable = "smoothAmount", type = "Number", defaultValue = 15)]	
 		public function get smoothAmount():Number { return _smoothAmount; }
 		public function set smoothAmount(value:Number):void {
 			_smoothAmount = value;
