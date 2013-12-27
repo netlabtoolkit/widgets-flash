@@ -177,6 +177,10 @@
 				outputValue = Math.min(outputValue,255);
 				outputValue = Math.max(0,outputValue);
 			}
+			
+			if (roundOutput && valueType == "number") {
+				outputValue = Math.round(outputValue);
+			}
 
 			if (connectButton.text == "on" && outputValue != lastOutputValue && connectionComplete) {
 				if (controller == "make") {
@@ -255,6 +259,22 @@
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
+			draw();
+		}
+		
+		private var _roundOutput:Boolean = true;
+		[Inspectable (name = "roundOutput", variable = "roundOutput", type = "Boolean", defaultValue=true)]
+		public function get roundOutput():Boolean { return _roundOutput; }
+		public function set roundOutput(value:Boolean):void {
+			_roundOutput = value;
+			//draw();
+		}
+		
+		private var _controllerOutputNum:Number = 0;
+		[Inspectable (name = "controllerOutputNum", variable = "controllerOutputNum", type = "Number", defaultValue = 0)]
+		public function get controllerOutputNum():Number { return _controllerOutputNum; }
+		public function set controllerOutputNum(value:Number):void {
+			_controllerOutputNum = value;
 			draw();
 		}
 	}
