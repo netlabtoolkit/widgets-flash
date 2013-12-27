@@ -38,7 +38,7 @@
 		
 		// buttons
 		public var connectButton:ToggleButton;
-		public var servoSpeedSetButton:ToggleButton;
+		//public var servoSpeedSetButton:ToggleButton;
 		public var rotateLeftButton:MomentaryButton;
 		public var rotateRightButton:MomentaryButton;
 		
@@ -60,7 +60,7 @@
 		
 		// buttons
 		public var connect:MovieClip;
-		public var servoSpeedSet:MovieClip;
+		//public var servoSpeedSet:MovieClip;
 		public var rotateLeft:MovieClip;
 		public var rotateRight:MovieClip;
 		
@@ -80,7 +80,7 @@
 			
 			// set up the buttons
 			connectButton = new ToggleButton(connect, this, "connect");
-			servoSpeedSetButton = new ToggleButton(servoSpeedSet, this, "servoSpeedSet");
+			//servoSpeedSetButton = new ToggleButton(servoSpeedSet, this, "servoSpeedSet");
 			rotateLeftButton = new MomentaryButton(rotateLeft, this, "rotateLeft");
 			rotateRightButton = new MomentaryButton(rotateRight, this, "rotateRight");
 
@@ -89,7 +89,7 @@
 			
 			// set up the defaults for this widget's parameters
 			paramsList.push(["connectButton", "off", "button"]);
-			paramsList.push(["servoSpeedSetButton", "off", "button"]);
+			//paramsList.push(["servoSpeedSetButton", "off", "button"]);
 
 			
 			// set the name used in the parameters XML
@@ -114,9 +114,9 @@
 				//theConnection.sendData("/service/osc/reader-writer/nlhubconfig/connect " + controllerIP + ":" + controllerPort);
 				theConnection.sendData("/service/osc/reader-writer/connect " + controllerPort);
 				// set the servo port speed initially
-				if (servoSpeedSetButton.text == "on") {
-					if (controller == "make") theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + "/servo/" + controllerOutputNum + "/speed " + servoSpeed);
-				} else if (servoSpeedSetButton.text == "off") {
+				if (servoSpeedSet) {
+					theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + "/servo/" + controllerOutputNum + "/speed " + servoSpeed);
+				} else {
 					theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + "/servo/" + controllerOutputNum + "/speed 1023");
 				}
 				// output initial value
@@ -244,5 +244,20 @@
 			//draw();
 		}
 		
+		private var _servoSpeedSet:Boolean = false;
+		[Inspectable (name = "servoSpeedSet", variable = "servoSpeedSet", type = "Boolean", defaultValue = false)]
+		public function get servoSpeedSet():Boolean { return _servoSpeedSet; }
+		public function set servoSpeedSet(value:Boolean):void {
+			_servoSpeedSet = value;
+			//draw();
+		}
+		
+		private var _controllerOutputNum:Number = 0;
+		[Inspectable (name = "controllerOutputNum", variable = "controllerOutputNum", type = "Number", defaultValue = 0)]
+		public function get controllerOutputNum():Number { return _controllerOutputNum; }
+		public function set controllerOutputNum(value:Number):void {
+			_controllerOutputNum = value;
+			draw();
+		}
 	}
 }
