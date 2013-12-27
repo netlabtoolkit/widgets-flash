@@ -138,6 +138,7 @@
 			eol = connectString.split(" ")[2].indexOf("\n");
 			if (eol >= 0) hubDeviceName = connectString.split(" ")[2].substring(0,eol);
 			else hubDeviceName = connectString.split(" ")[2];
+			//hubDeviceName = cutPrefix(hubDeviceName,"//./");
 		}
 		
 		public function finishConnect() {
@@ -152,6 +153,13 @@
 
 		public function handleInputFeed( event:NetFeedEvent ):void {
 			// stub function
+		}
+		
+		function cutPrefix(string, prefix) {
+			var preLoc = string.indexOf(prefix);
+			trace("cutPrefix: " + preLoc);
+			if (preLoc == 0) return string.substring(preLoc + prefix.length)
+			else return string;
 		}
 		
 		//----------------------------------------------------------

@@ -155,7 +155,7 @@
 							accel.addEventListener(AccelerometerEvent.UPDATE, accelUpdate);
 						} else {
 							// If there is no access to the Accelerometer
-							trace("ACCELERATOR IS NOT SUPPORTED ON THIS DEVICE");
+							trace("ACCELEROMETER IS NOT SUPPORTED ON THIS DEVICE");
 						}
 						break;
 						
@@ -225,7 +225,7 @@
 			} else if (controller == "hubFeed") {
 				theConnection.sendData("service/tools/pipe/receive/" + hubFeedName);
 			} else if (controller == "serial") {
-				theConnection.sendData("/service/tools/serial/{" + serialPort + "}/listen");
+				theConnection.sendData("/service/tools/serial/{" + hubDeviceName + "}/listen");
 			}
 			super.finishConnect();
 		}
@@ -235,64 +235,77 @@
 			var theValue;
 			var argsString:String;
 			var args:Array;
-			var myPattern:RegExp = /\"/g; // for getting rid of quotes
 			var dataSplit:Array;
-	
-			//trace("the data: " + data);
+			var quotePattern:RegExp = /\"/g; // for getting rid of quotes
+			var lbracePattern:RegExp = /\}/g; // for getting rid of left brace
+			var rbracePattern:RegExp = /\{/g; // for getting rid of right brace
 			
-			switch (controller) {
-
-				case "hubFeed" :
-				case "osc" :
-				case "accelerometer" : 
-				case "serial" :
-					//trace("data: " + data);
-					data = data.replace(myPattern,""); // remove any quotes
-					dataSplit = data.split(" ");
-					// use controllerInputNum as the argument position for the string, where the first arguement is 0
-					// e.g. if the string is /acceleration/xyz 0.1 0.2 0.3 and controllerInputNum = 1, theValue will equal 0.2 for the second position
-					var dataPosition = controllerInputNum + 1;
-					if (dataSplit.length > dataPosition) theValue = dataSplit[dataPosition];
-					else if (dataSplit.length > 1) theValue = dataSplit[1];
-					else {
-						theValue = 0;
-						trace("NO DATA FROM DEVICE");
-					}
-					//trace("theValue: " + theValue);
-					if(theValue.indexOf("OK") < 0 && theValue.indexOf("FAIL") < 0) {
-						theValue *= multiplier;
-						// also make full OSC-like inputs available via code interface
-						// from above example, will forward 0.1, 0.2, 0.3 as arguments
-						argsString = data.substr(data.indexOf(" ") + 1);
-						args = argsString.split(" ");
-						multiInput.apply(null,args);
-					}
-
-					break;
-				case "make" :
-				case "xbee" :
-				case "arduino" : 
-				case "mic" :
-					dataSplit = data.split(" ");
-					if (dataSplit.length > 1) theValue = (data.split(" "))[1];
-					else {
-						theValue = 0;
-						trace("NO DATA FROM DEVICE - IS IP ADDRESS CORRECT?");
-					}
-					break;
-			}
-			if (!isNaN(theValue)) {
-				smoothingTimer.stop();
-				processRawValue(Number(theValue), this);
-			} else if (theValue.indexOf("OK") >=0) {
+			//trace("data: " + data);
+			argsString = data.substr(data.indexOf(" ") + 1);
+			argsString = argsString.replace(quotePattern,""); // remove any quotes
+			argsString = argsString.replace(lbracePattern,""); // remove braces
+			argsString = argsString.replace(rbracePattern,"");
+			//trace("args: " + argsString);
+			dataSplit = argsString.split(" ");			
+			
+			if (dataSplit[0].indexOf("OK") >=0) {
 				if (controller == "arduino" || controller == "xbee" || controller == "serial") getHubDevice(data);
 				else hubDeviceName = "";
 				finishConnect();
-			} else if (theValue.indexOf("FAIL") >=0) {
+			} else if (dataSplit[0].indexOf("FAIL") >=0) {
 				disConnect();
 				failConnect(data);
+			} else {	
+			
+				switch (controller) {
+
+					case "hubFeed" :
+					case "osc" :
+					case "accelerometer" : 
+					case "serial" :
+
+						// use controllerInputNum as the argument position for the string, where the first arguement is 0
+						// e.g. if the string is /acceleration/xyz 0.1 0.2 0.3 and controllerInputNum = 1, theValue will equal 0.2 for the second position
+						if (dataSplit.length > controllerInputNum) theValue = dataSplit[controllerInputNum];
+						else if (dataSplit.length > 1) theValue = dataSplit[0];
+						else {
+							theValue = 0;
+							trace("NO DATA FROM DEVICE");
+						}
+						//trace("theValue: " + theValue);
+						//if(theValue.indexOf("OK") < 0 && theValue.indexOf("FAIL") < 0) {
+							if (isNaN(theValue)) {
+								theValue = theValue.charCodeAt(0); // convert to the ascii value of the first char
+							}
+							theValue *= multiplier;
+							// also make full OSC-like inputs available via code interface
+							// from above example, will forward 0.1, 0.2, 0.3 as arguments
+							multiInput.apply(null,dataSplit);
+						//}
+
+						break;
+					case "make" :
+					case "xbee" :
+					case "arduino" : 
+					case "mic" :
+						//theValue = datasplit[0];
+						if (isNaN(dataSplit[0])) {
+							theValue = 0;
+							trace("NO DATA FROM DEVICE");
+						} else {
+							theValue = dataSplit[0];
+						}
+						break;
+				}
+			}
+			
+			//trace(dataSplit[0]);
+			if (!isNaN(theValue)) {
+				smoothingTimer.stop();
+				processRawValue(Number(theValue), this);
 			}
 		}
+		
 		public function fillSmoothingBuffer(fill:Number): void {
 			for (var i:int=0; i <  smoothingBuffer.length; i++) { // fill the buffer the passed number
 				smoothingBuffer[i] = fill;
@@ -382,8 +395,12 @@
 				// do easing
 				//easingLastValue += (processedValue - easingLastValue) / widget.easeAmount;
 				//easingLastValue = easeOutCubic (0.5,easingLastValue,(processedValue - easingLastValue),10);
+				//trace("easing last: " + easingLastValue);
+				//if (easingLastValue < 0.0001) easingLastValue = 0;
 				easingLastValue = easeOutExpo (0.17,easingLastValue,(processedValue - easingLastValue),widget.easeAmount);
+				if (Math.abs(easingLastValue - processedValue) < 0.0001) easingLastValue = processedValue;
 				processedValue = easingLastValue;
+				//trace("easing: " + processedValue);
 			}
 
 			// handle ceiling/floor min/max setup
@@ -411,20 +428,25 @@
 				processedValue = (valueConstrained * (minMaxScale/rawScaleConstrained)) + Math.round(min);
 			}
 			
-			widget.sOut.text = String(Math.round(processedValue));
-			
-			lastRawValue = rawValue;
-			lastProcessedValue = processedValue;
+
 			// set up a timer to fill in values if nothing comes in
 			// otherwise, the smoothing and easing won't clear out and settle correctly if the values don't change
 			if(widget.smoothButton.text == "on" || widget.easeButton.text == "on") {
 				//trace("start timer");
+				
 				smoothingTimer.stop();
 				smoothingTimer.removeEventListener(TimerEvent.TIMER, smoothingFillIn);
-				smoothingTimer = new Timer(smoothingTimerMsecs, 1);
-				smoothingTimer.addEventListener(TimerEvent.TIMER, smoothingFillIn);
-				smoothingTimer.start(); 
+				if (widget.easeButton.text != "on" || lastProcessedValue != processedValue) {
+					smoothingTimer = new Timer(smoothingTimerMsecs, 1);
+					smoothingTimer.addEventListener(TimerEvent.TIMER, smoothingFillIn);
+					smoothingTimer.start(); 
+				}
 			}
+			
+			widget.sOut.text = String(Math.round(processedValue));
+			
+			lastRawValue = rawValue;
+			lastProcessedValue = processedValue;
 			
 			stage.dispatchEvent(new NetFeedEvent(this.name, 
 												 true,

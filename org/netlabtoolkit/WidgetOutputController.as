@@ -73,13 +73,15 @@
 			//draw();
 		}		
 		
+		/*
 		private var _controllerOutputNum:Number = 0;
 		[Inspectable (name = "controllerOutputNum", variable = "controllerOutputNum", type = "Number", defaultValue = 0)]
 		public function get controllerOutputNum():Number { return _controllerOutputNum; }
 		public function set controllerOutputNum(value:Number):void {
 			_controllerOutputNum = value;
 			draw();
-		}		
+		}	
+		*/
 		
 		private var _serialPort:String = "/dev/cu.usb*";
 		[Inspectable (name = "serialPort", variable = "serialPort", type = "String", defaultValue = "/dev/cu.usb*")]
