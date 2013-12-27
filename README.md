@@ -11,4 +11,4 @@ this work is uncompensated, so please be patient. We welcome suggestions for new
 
 This is free software. See the [license.txt](https://github.com/netlabtoolkit/hub/blob/master/license.txt) file for license details. 
 
-Philip van Allen, July 8, 2013. Last updated 8 July 2013.
+-Philip van Allen - Last updated December 26th, 2013 for v5.1.0
