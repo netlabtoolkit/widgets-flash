@@ -60,8 +60,8 @@
 		public var easingLastValue:Number = 0;
 		
 		// delay connection
-		private var connectDelayTimer:Timer;
-		private var randomDelay:int;
+		//private var connectDelayTimer:Timer;
+		//private var randomDelay:int;
 
 		
 		// set up for multiInput
@@ -98,7 +98,6 @@
 				setUpInputSource();
 			}
 			
-			//serialDeviceName = serialNameShort(serialPort);
 		}
 				
 		public function handleButton(buttonType:String, buttonState:String) {
@@ -203,6 +202,7 @@
 			} else {
 				if (theConnection != null) theConnection.closeConnection();
 			}
+			isConnected = false;
 		}
 		
 		public function initControllerConnection() {
@@ -220,8 +220,8 @@
 				
 		override public function finishConnect() {
 			if (controller == "osc") {
-				theConnection.sendData("/service/osc/reader-writer/listen " + " /" + controllerIP + oscString + " " + controllerPort);
-				//theConnection.sendData("/service/osc/reader-writer/filterresponse " + oscString);
+				theConnection.sendData("/service/osc/reader-writer/listen " + " /" + controllerIP + thisWidget.urlString + " " + controllerPort);
+				//theConnection.sendData("/service/osc/reader-writer/filterresponse " + urlString);
 			} else if (controller == "hubFeed") {
 				theConnection.sendData("service/tools/pipe/receive/" + hubFeedName);
 			} else if (controller == "serial") {
@@ -248,13 +248,19 @@
 			//trace("args: " + argsString);
 			dataSplit = argsString.split(" ");			
 			
-			if (dataSplit[0].indexOf("OK") >=0) {
-				if (controller == "arduino" || controller == "xbee" || controller == "serial") getHubDevice(data);
-				else hubDeviceName = "";
-				finishConnect();
-			} else if (dataSplit[0].indexOf("FAIL") >=0) {
+			if (dataSplit[0].indexOf("FAIL") >=0) {
 				disConnect();
 				failConnect(data);
+			} else if (dataSplit[0].indexOf("OK") >=0) {
+				if (!isConnected) {
+					if (controller == "arduino" || controller == "xbee" || controller == "serial") getHubDevice(data);
+					else hubDeviceName = "";
+					finishConnect();
+				}
+			} else if (controller == "httpGet" && !isConnected) {
+				hubDeviceName = "";
+				theValue = dataSplit[0];
+				finishConnect();
 			} else {	
 			
 				switch (controller) {
@@ -263,11 +269,12 @@
 					case "osc" :
 					case "accelerometer" : 
 					case "serial" :
+					case "httpGet" :
 
 						// use controllerInputNum as the argument position for the string, where the first arguement is 0
 						// e.g. if the string is /acceleration/xyz 0.1 0.2 0.3 and controllerInputNum = 1, theValue will equal 0.2 for the second position
 						if (dataSplit.length > controllerInputNum) theValue = dataSplit[controllerInputNum];
-						else if (dataSplit.length > 1) theValue = dataSplit[0];
+						else if (dataSplit.length > 0) theValue = dataSplit[0];
 						else {
 							theValue = 0;
 							trace("NO DATA FROM DEVICE");
@@ -288,18 +295,18 @@
 					case "xbee" :
 					case "arduino" : 
 					case "mic" :
-						//theValue = datasplit[0];
 						if (isNaN(dataSplit[0])) {
 							theValue = 0;
 							trace("NO DATA FROM DEVICE");
 						} else {
-							theValue = dataSplit[0];
+							theValue = Math.abs(dataSplit[0]);
 						}
 						break;
 				}
 			}
 			
 			//trace(dataSplit[0]);
+			//trace(theValue);
 			if (!isNaN(theValue)) {
 				smoothingTimer.stop();
 				processRawValue(Number(theValue), this);
@@ -455,6 +462,7 @@
 												 processedValue));
 		}
 		
+		
 		private function easeOutCubic (t, b, c, d) { 
 			return c * (Math.pow (t/d-1, 3) + 1) + b;
 		}
@@ -483,7 +491,7 @@
 		
 		// parameters in alphabetized order		
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,xbee,make,osc,serial,accelerometer,mic,hubFeed,inputSource", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,xbee,httpGet,osc,serial,accelerometer,mic,hubFeed,make,inputSource", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
@@ -513,14 +521,6 @@
 			_multiplier = value;
 			//draw();
 		}		
-		
-		private var _oscString:String = "/netlabwidget";		
-		[Inspectable (name = "oscString", variable = "oscString", type = "String", defaultValue = "/netlabwidget")]	
-		public function get oscString():String { return _oscString; }
-		public function set oscString(value:String):void {
-			_oscString = value;
-			draw();
-		}
 		
 		private var _hubFeedName:String = "feed0";		
 		[Inspectable (name = "hubFeedName", variable = "hubFeedName", type = "String", defaultValue = "feed0")]	

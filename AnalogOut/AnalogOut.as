@@ -130,6 +130,9 @@
 				theConnection.sendData("/service/tools/pipe/connect/" + hubFeedName);
 			} else if (controller == "serial") {
 				theConnection.sendData("/service/tools/serial/connect " + serialPort + " " + serialBaudArduinoFirmata);
+			} else if (controller == "httpGet") {
+				hubDeviceName = "";
+				super.finishConnect();
 			}
 		}
 		
@@ -172,7 +175,7 @@
 				if (valueType == "number") {
 					outputValue = String(Number(outputValue) * multiplier);
 				} 
-			} else if (controller == "arduino") {
+			} else if (controller == "arduino" || controller == "httpGet") {
 				outputValue = Math.floor(Number(outputValue)/4); // Arduino permits a PWM range of 0-255
 				outputValue = Math.min(outputValue,255);
 				outputValue = Math.max(0,outputValue);
@@ -189,11 +192,15 @@
 				} else if (controller == "arduino") {
 					theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/analogout/" + controllerOutputNum + " " + outputValue);
 				} else if (controller == "osc") {
-					theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + oscString + " " + outputValue);
+					theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + urlString + " " + outputValue);
 				} else if (controller == "hubFeed") {
 					theConnection.sendData("/service/tools/pipe/send/" + hubFeedName + " " + outputValue);
 				} else if (controller == "serial") {
 					theConnection.sendData("/service/tools/serial/{" + hubDeviceName + "}/write/ " + outputValue);
+				} else if (controller == "httpGet") {
+					//theConnection.sendData("/service/httpclient/reader/get/" + controllerIP + "/arduino/analog/" + controllerOutputNum + "/" + outputValue);
+					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
+					theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
 				}
 				lastOutputValue = outputValue;
 			} else {
@@ -244,7 +251,7 @@
 			//trace("in draw");
 			sInputSource.text = inputSource;
 			if (controller == "osc") {
-				sOutputPort.text = controller + " " + oscString;
+				sOutputPort.text = controller + " " + urlString;
 			} else if (controller == "hubFeed") {
 				sOutputPort.text = controller;
 			} else sOutputPort.text = controller + " " + controllerOutputNum;
@@ -255,7 +262,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,make,osc,serial,hubFeed", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,make,osc,serial,hubFeed", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
@@ -275,6 +282,15 @@
 		public function get controllerOutputNum():Number { return _controllerOutputNum; }
 		public function set controllerOutputNum(value:Number):void {
 			_controllerOutputNum = value;
+			draw();
+		}
+		
+		
+		private var _urlString:String = "/arduino/analog";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/analog")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
 			draw();
 		}
 	}

@@ -89,15 +89,20 @@
 				else hubDeviceName = "";
 				finishConnect();
 			} else if (theValue.indexOf("FAIL") >=0) {
-				disConnect();
-				failConnect(data);
-			} else trace("Unexpected data from output controller: " + data);
+				if (!isConnected) {
+					disConnect();
+					failConnect(data);
+				} else {
+					trace("FAIL send");
+				}
+			} else if ( !isConnected) {
+				hubDeviceName = "";
+				finishConnect();
+			} //else trace("Unexpected data from output controller: " + data);
 		}
 		
 		override public function finishConnect() {
 			connectionComplete = true;
-			//trace("..." + this.name + " connected");
-			//trace("..." + this.name + " connected to Hub device #" + hubDeviceNumber);
 			super.finishConnect();
 		}
 		

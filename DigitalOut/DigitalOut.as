@@ -122,15 +122,15 @@
 				//theConnection.sendData("/service/xbee/reader-writer/nlhubconfig/connect " + serialPort + " " + serialBaudXbee);
 				// output initial value
 				//sendOutput(0);
-			} else if (_controller == "osc") {
+			} else if (controller == "osc") {
 				theConnection.sendData("/service/osc/reader-writer/nlhubconfig/connect " + controllerIP + ":" + controllerPort);
-			} else if (_controller == "hubFeed") {
+			} else if (controller == "hubFeed") {
 				theConnection.sendData("/service/core/pipe/nlhubconfig/connect " + hubFeedName + " send");
+			} else if (controller == "httpGet") {
+				theConnection.sendData("/service/httpclient/reader-writer/get/" + controllerIP + "/arduino/mode/" + controllerOutputNum + "/output");
+				hubDeviceName = "";
+				super.finishConnect();
 			}
-			
-			// output initial value
-			//sendOutput(0);
-			
 		}
 		
 		override public function finishConnect() {
@@ -162,9 +162,12 @@
 				// /service/xbee/reader-writer/COM6/57/digitalout/0 1
 					theConnection.sendData("/service/xbee/reader-writer-series-1/{" + hubDeviceName + "}/" + xbeeRemoteID + "/digitalout/" + port + " "  + String(outputValue));
 				} else if (controller == "osc") {
-					theConnection.sendData("/service/osc/reader-writer" + oscString + " " + String(outputValue * multiplier));
+					theConnection.sendData("/service/osc/reader-writer" + urlString + " " + String(outputValue * multiplier));
 				} else if (controller == "hubFeed") {
 					theConnection.sendData("/service/core/pipe/value " + String(outputValue * multiplier));
+				} else if (controller == "httpGet") {
+					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
+					if (connectionComplete) theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
 				}
 				lastOutputValue = outputValue;
 			} else {
@@ -212,7 +215,7 @@
 			if (controller == "xbee") {
 				sOutputPort.text = controller + " " + xbeeRemoteID + " " + controllerOutputNum;
 			} if (controller == "osc") {
-				sOutputPort.text = controller + " " + oscString;
+				sOutputPort.text = controller + " " + urlString;
 			} else {
 				sOutputPort.text = controller + " " + controllerOutputNum;
 			}
@@ -223,7 +226,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,xbee,make,osc,hubFeed", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,xbee,make,osc,hubFeed", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
@@ -253,6 +256,14 @@
 			_controllerOutputNum = value;
 			draw();
 		}
+
 		
+		private var _urlString:String = "/arduino/digital";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/digital")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
+			draw();
+		}
 	}
 }

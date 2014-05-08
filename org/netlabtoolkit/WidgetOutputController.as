@@ -99,14 +99,6 @@
 			//draw();
 		}		
 		
-		private var _oscString:String = "/netlabwidget";		
-		[Inspectable (name = "oscString", variable = "oscString", type = "String", defaultValue = "/netlabwidget")]	
-		public function get oscString():String { return _oscString; }
-		public function set oscString(value:String):void {
-			_oscString = value;
-			draw();
-		}
-		
 		private var _hubFeedName:String = "feed0";		
 		[Inspectable (name = "hubFeedName", variable = "hubFeedName", type = "String", defaultValue = "feed0")]	
 		public function get hubFeedName():String { return _hubFeedName; }

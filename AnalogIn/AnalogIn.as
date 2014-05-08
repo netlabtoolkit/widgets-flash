@@ -4,6 +4,7 @@
 	import flash.events.*;
 	import flash.text.TextField;
 	import flash.geom.Rectangle;
+	import flash.utils.*;
 	import org.netlabtoolkit.*;
 	
 	/**
@@ -42,7 +43,6 @@
 		public var knobRange:int = 100;
 		private var floorDefault:String = "0";
 
-		
 		// instances of objects on the Flash stage
 		//
 		// fields
@@ -130,15 +130,25 @@
 				theConnection.sendData("/service/xbee/reader-writer-series-1/connect " + serialPort + " " + serialBaudXbee);
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/connect " + serialPort);
+			} else if (controller == "httpGet") {
+				theConnection.sendData("/service/httpclient/reader-writer/poll /get/" + controllerIP + urlString + "/" + "99" + " 0 " + sampleRate);
 			} else super.initControllerConnection();
 		}
 		
 		override public function finishConnect() {
 			if (controller == "xbee") { 
-				//theConnection.sendData("/service/xbee/reader-writer-series-1/{" + hubDeviceName + "}/" + xbeeRemoteID + "/analogin/" + controllerInputNum);
-				theConnection.sendData("/service/xbee/reader-writer-series-1/poll /{" + hubDeviceName + "}/" + xbeeRemoteID + "/analogin/" + controllerInputNum + " 0 " + sampleRate);
+				/// service/xbee/reader-writer-series-1/poll /{/dev/cu.usbserial-A100S8YL}/4/rssi
+				// /service/xbee/reader-writer-series-1/poll /{/dev/cu.usbserial-A6007WLE}/19/rssi/ 0 24
+				// /service/xbee/reader-writer-series-1/poll /{/dev/cu.usbserial-A6007WLE}/19/rssi 0 24
+				if (controllerInputNum == 99) { // get RSSI value instead of analogin
+					theConnection.sendData("/service/xbee/reader-writer-series-1/poll /{" + hubDeviceName + "}/" + xbeeRemoteID + "/rssi");
+				} else {
+					theConnection.sendData("/service/xbee/reader-writer-series-1/poll /{" + hubDeviceName + "}/" + xbeeRemoteID + "/analogin/" + controllerInputNum + " 0 " + sampleRate);
+				}
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/poll /{" + hubDeviceName + "}/analogin/" + controllerInputNum + " 0 " + sampleRate);
+			} else if (controller == "httpGet") {
+				//
 			} else if (controller == "make") {
 				theConnection.sendData("/service/osc/reader-writer/listen " + " /" + controllerIP + "/analogin/" + controllerInputNum + "/value " + controllerPort);
 				// make sure the output port is not set up as a digital in
@@ -162,7 +172,7 @@
 			} else if (controller == "xbee") {
 				sInputSource.text = controller + " " + xbeeRemoteID + " " + controllerInputNum;
 			} else if (controller == "osc") {
-				sInputSource.text = controller + " " + controllerInputNum + " " + oscString;
+				sInputSource.text = controller + " " + controllerInputNum + " " + urlString;
 			} else if (controller == "accelerometer") {
 				sInputSource.text = "accel " + controllerInputNum;
 			} else if (controller == "mic") {
@@ -195,7 +205,15 @@
 		public function set easeAmount(value:Number):void {
 			_easeAmount = value;
 			//draw();
-		}	
+		}
+		
+		private var _urlString:String = "/arduino/analog";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/analog")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
+			draw();
+		}
 
 	}
 }

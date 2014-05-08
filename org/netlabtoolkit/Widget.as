@@ -40,6 +40,7 @@
 		public var serialBaudArduinoFirmata:String = "57600"; // 115200 for Firmata 2.0/Arduino 16, 57600 for Firmata 2.1/Arduino 18
 		public var serialBaudXbee:String = "9600";
 		public var serialDeviceName:String;
+		public var isConnected:Boolean = false;
 		
 		// inherit constructor, so we don't need to create one
 		//public function AnalogInput(w:Number = NaN, h:Number = NaN) {
@@ -144,6 +145,7 @@
 		public function finishConnect() {
 			if (hubDeviceName != "") trace("..." + this.name + " connected to device: " + hubDeviceName);
 			else trace("..." + this.name + " connected");
+			isConnected = true;
 		}
 
 		public function failConnect(hubMessage) {

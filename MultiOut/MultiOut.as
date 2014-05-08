@@ -178,6 +178,9 @@
 				theConnection.sendData("/service/tools/pipe/connect/" + hubFeedName);
 			} else if (controller == "serial") {
 				theConnection.sendData("/service/tools/serial/connect " + serialPort + " " + serialBaudArduinoFirmata);
+			} else if (controller == "httpGet") {
+				hubDeviceName = "";
+				super.finishConnect();
 			}
 		}
 		
@@ -196,22 +199,26 @@
 				if (i != 0) outputString += " ";
 				outputString += String(outputArray[i]);
 			}
+			
+			if (controller == "httpGet") outputString = outputString.split(" ").join("-");
 
 			out.text = outputString;
 			
-			if (controller != "osc") outputString = "{" + outputString + "}";
+			if (controller != "osc" && controller != "httpGet") outputString = "{" + outputString + "}";
 			//trace("got " + outputString + " " + lastOutputValue);
 			if (connectButton.text == "on" && connectionComplete) {
 				if (outputString != lastOutputValue) {
 					//trace("sent " + outputString + " " + lastOutputValue);
 					if (controller == "osc") {
-						theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + oscString + " " + outputString);
+						theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + urlString + " " + outputString);
 					} else if (controller == "hubFeed") {
 						theConnection.sendData("/service/tools/pipe/send/" + hubFeedName + " " + outputString);
 					} else if (controller == "serial") {
 						theConnection.sendData("/service/tools/serial/{" + hubDeviceName + "}/write/ " + outputString);
+					} else if (controller == "httpGet") {
+						var url = "/" + controllerIP + urlString;
+						theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputString + " {} " + url);
 					}
-
 				}
 				lastOutputValue = outputString;
 			} else {
@@ -308,7 +315,7 @@
 			input4.text = inputSource4;
 			
 			if (controller == "osc") {
-				outputDevice.text = controller + " " + oscString;
+				outputDevice.text = controller + " " + urlString;
 			} else if (controller == "hubFeed") {
 				outputDevice.text = controller + " " + hubFeedName;
 			} else {
@@ -321,7 +328,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "serial";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="serial,osc,hubFeed", defaultValue="serial")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="serial,httpGet,osc,hubFeed", defaultValue="serial")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
@@ -336,8 +343,8 @@
 			//draw();
 		}
 		
-		private var _numParameters:Number = 2;
-		[Inspectable (name = "numParameters", variable = "numParameters", type = "Number", enumeration="2,3,4,5", defaultValue = 2)]
+		private var _numParameters:Number = 1;
+		[Inspectable (name = "numParameters", variable = "numParameters", type = "Number", enumeration="1,2,3,4,5", defaultValue = 1)]
 		public function get numParameters():Number { return _numParameters; }
 		public function set numParameters(value:Number):void {
 			_numParameters = value;
@@ -373,6 +380,14 @@
 		public function get inputSource4():String { return _inputSource4; }
 		public function set inputSource4(value:String):void {
 			_inputSource4 = value;
+			draw();
+		}
+		
+		private var _urlString:String = "/arduino/user";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/user")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
 			draw();
 		}
 	}

@@ -123,7 +123,11 @@
 				//sendOutput(Number(sOut.text));
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/connect " + serialPort);
-			} 
+			} else if (controller == "httpGet") {
+				//theConnection.sendData("/service/httpclient/reader/get/" + controllerIP + "/arduino/servo/" + controllerOutputNum + "/" + 0);
+				hubDeviceName = "";
+				super.finishConnect();
+			}
 		}
 		
 		override public function finishConnect() {
@@ -132,8 +136,10 @@
 			} else if (controller == "arduino") {
 				//service/arduino/[servicename]/[serial-port]/servo/[pin]/config [minpulse] [maxpulse] [angle]
 				theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/servo/" + controllerOutputNum + "/config 544 2400 90");
+			} else if (controller == "httpGet") {
+				
 			}
-			super.finishConnect()
+			super.finishConnect();
 		}
 		
 		override public function handleButton(buttonType:String, buttonState:String) {
@@ -179,9 +185,12 @@
 					lastMakePosition = makePosition;
 				} else if (controller == "arduino") {
 					if (connectionComplete) theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/servo/" + controllerOutputNum + "/angle " + outputValue);
+				} else if (controller == "httpGet") {
+					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
+					if (connectionComplete) theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
 				}
 			} 
-			sOut.text = String(Math.round(outputValue));
+			sOut.text = String(outputValue);
 			servoDisplayRotate(outputValue);
 		
 		}
@@ -228,7 +237,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,make", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,make", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
@@ -257,6 +266,14 @@
 		public function get controllerOutputNum():Number { return _controllerOutputNum; }
 		public function set controllerOutputNum(value:Number):void {
 			_controllerOutputNum = value;
+			draw();
+		}
+		
+		private var _urlString:String = "/arduino/servo";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/servo")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
 			draw();
 		}
 	}

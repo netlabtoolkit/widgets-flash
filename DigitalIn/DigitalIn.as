@@ -111,6 +111,9 @@
 				//theConnection.sendData("/service/xbee/reader-writer/" + xbeeRemoteID + "/digitalin/" + controllerInputNum + "/value");
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/config/connect " + serialPort);
+			} else if (controller == "httpGet") {
+				theConnection.sendData("/service/httpclient/reader-writer/get/" + controllerIP + "/arduino/mode/" + controllerInputNum + "/input");
+				theConnection.sendData("/service/httpclient/reader-writer/poll /get/" + controllerIP + urlString + "/" + controllerInputNum + " 0 " + sampleRate);
 			} else {
 				super.initControllerConnection();
 			}
@@ -166,7 +169,7 @@
 			} else if (controller == "xbee") {
 				sInputSource.text = controller + " " + xbeeRemoteID + " " + controllerInputNum;
 			} else if (controller == "osc") {
-				sInputSource.text = controller + " " + oscString;
+				sInputSource.text = controller + " " + urlString;
 			} else if (controller == "accelerometer") {
 				sInputSource.text = "accel " + controllerInputNum;
 			} else if (controller == "mic") {
@@ -181,5 +184,14 @@
 		//----------------------------------------------------------
 		// parameter getter setter functions
 
+		
+		
+		private var _urlString:String = "/arduino/digital";		
+		[Inspectable (name = "urlString", variable = "urlString", type = "String", defaultValue = "/arduino/digital")]	
+		public function get urlString():String { return _urlString; }
+		public function set urlString(value:String):void {
+			_urlString = value;
+			draw();
+		}
 	}
 }

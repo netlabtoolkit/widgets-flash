@@ -34,8 +34,8 @@
 		private var hubIP:String = "localhost";
 		private var hubPort:int = 51000;
 		private var dataConsumer:MovieClip;
-		private var connectDelayTimer:Timer;
-		private var randomDelay:int;
+		//private var connectDelayTimer:Timer;
+		//private var randomDelay:int;
 		
 		private var xmlSocket:XMLSocket;
 	  
@@ -46,10 +46,11 @@
 			this.hubPort = hubPort;
 			this.dataConsumer = dataConsumer;
 			
+			/*
 			randomDelay = Math.round((Math.random() * 1000) + 1000);
 			connectDelayTimer = new Timer(randomDelay, 1);
 			connectDelayTimer.addEventListener(TimerEvent.TIMER, finishConnect);
-			
+			*/
 			
 			xmlSocket = new XMLSocket();
 		  
@@ -77,11 +78,13 @@
 			dataConsumer.initControllerConnection();
 			
 		}
-		
+		/*
 		public function finishConnect(event:TimerEvent) {
 			//trace("finishConnect");
+			
 			dataConsumer.initControllerConnection();
 		}
+		*/
 	
 		private function processData( event:DataEvent ):void {
 	 
