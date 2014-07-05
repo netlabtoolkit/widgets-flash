@@ -111,7 +111,7 @@
 				//theConnection.sendData("/service/xbee/reader-writer/" + xbeeRemoteID + "/digitalin/" + controllerInputNum + "/value");
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/config/connect " + serialPort);
-			} else if (controller == "httpGet") {
+			} else if (controller == "iotnREST") {
 				theConnection.sendData("/service/httpclient/reader-writer/get/" + controllerIP + "/arduino/mode/" + controllerInputNum + "/input");
 				theConnection.sendData("/service/httpclient/reader-writer/poll /get/" + controllerIP + urlString + "/" + controllerInputNum + " 0 " + sampleRate);
 			} else {
@@ -168,7 +168,7 @@
 				sInputSource.text = inputSource;
 			} else if (controller == "xbee") {
 				sInputSource.text = controller + " " + xbeeRemoteID + " " + controllerInputNum;
-			} else if (controller == "osc") {
+			} else if (controller == "osc" || controller == "iotnREST") {
 				sInputSource.text = controller + " " + urlString;
 			} else if (controller == "accelerometer") {
 				sInputSource.text = "accel " + controllerInputNum;

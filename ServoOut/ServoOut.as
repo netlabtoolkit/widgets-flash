@@ -123,7 +123,7 @@
 				//sendOutput(Number(sOut.text));
 			} else if (controller == "arduino") {
 				theConnection.sendData("/service/arduino/reader-writer/connect " + serialPort);
-			} else if (controller == "httpGet") {
+			} else if (controller == "iotnREST") {
 				//theConnection.sendData("/service/httpclient/reader/get/" + controllerIP + "/arduino/servo/" + controllerOutputNum + "/" + 0);
 				hubDeviceName = "";
 				super.finishConnect();
@@ -136,7 +136,7 @@
 			} else if (controller == "arduino") {
 				//service/arduino/[servicename]/[serial-port]/servo/[pin]/config [minpulse] [maxpulse] [angle]
 				theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/servo/" + controllerOutputNum + "/config 544 2400 90");
-			} else if (controller == "httpGet") {
+			} else if (controller == "iotnREST") {
 				
 			}
 			super.finishConnect();
@@ -185,7 +185,7 @@
 					lastMakePosition = makePosition;
 				} else if (controller == "arduino") {
 					if (connectionComplete) theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/servo/" + controllerOutputNum + "/angle " + outputValue);
-				} else if (controller == "httpGet") {
+				} else if (controller == "iotnREST") {
 					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
 					if (connectionComplete) theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
 				}
@@ -237,7 +237,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,make", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,iotnREST,make", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;

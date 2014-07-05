@@ -257,7 +257,7 @@
 					else hubDeviceName = "";
 					finishConnect();
 				}
-			} else if (controller == "httpGet" && !isConnected) {
+			} else if (controller == "iotnREST" && !isConnected) {
 				hubDeviceName = "";
 				theValue = dataSplit[0];
 				finishConnect();
@@ -269,7 +269,7 @@
 					case "osc" :
 					case "accelerometer" : 
 					case "serial" :
-					case "httpGet" :
+					case "iotnREST" :
 
 						// use controllerInputNum as the argument position for the string, where the first arguement is 0
 						// e.g. if the string is /acceleration/xyz 0.1 0.2 0.3 and controllerInputNum = 1, theValue will equal 0.2 for the second position
@@ -491,7 +491,7 @@
 		
 		// parameters in alphabetized order		
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,xbee,httpGet,osc,serial,accelerometer,mic,hubFeed,make,inputSource", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,xbee,iotnREST,osc,serial,accelerometer,mic,hubFeed,make,inputSource", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;

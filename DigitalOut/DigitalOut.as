@@ -126,7 +126,7 @@
 				theConnection.sendData("/service/osc/reader-writer/nlhubconfig/connect " + controllerIP + ":" + controllerPort);
 			} else if (controller == "hubFeed") {
 				theConnection.sendData("/service/core/pipe/nlhubconfig/connect " + hubFeedName + " send");
-			} else if (controller == "httpGet") {
+			} else if (controller == "iotnREST") {
 				theConnection.sendData("/service/httpclient/reader-writer/get/" + controllerIP + "/arduino/mode/" + controllerOutputNum + "/output");
 				hubDeviceName = "";
 				super.finishConnect();
@@ -139,8 +139,6 @@
 				var prefixString = "/pwmout/" + controllerOutputNum + "/active 0";
 				theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + prefixString);
 			}
-			//trace("..." + this.name + " connected");
-			//trace("..." + this.name + " connected to Hub device #" + hubDeviceNumber);
 			super.finishConnect();
 		}
 		
@@ -150,22 +148,18 @@
 			if (port == -1) port = controllerOutputNum;
 			//trace(this.name + " " + outputValue);
 			if (connectButton.text == "on" && outputValue != lastOutputValue && connectionComplete) {
-				if (controller == "make") {
-					// /digitalout/" + outputPt + "/value " + outputValue;
-					//theConnection.sendData("/service/osc/reader-writer/digitalout/" + port + "/value " + String(outputValue));
-					
+				if (controller == "make") {					
 					var prefixString = "/digitalout/" + controllerOutputNum + "/value " + String(outputValue);
 					theConnection.sendData("/service/osc/reader-writer/" + controllerIP + ":" + controllerPort + prefixString);
 				} else if (controller == "arduino") {
 					theConnection.sendData("/service/arduino/reader-writer/{" + hubDeviceName + "}/digitalout/" + controllerOutputNum + " " + String(outputValue));
 				} else if (controller == "xbee") {
-				// /service/xbee/reader-writer/COM6/57/digitalout/0 1
 					theConnection.sendData("/service/xbee/reader-writer-series-1/{" + hubDeviceName + "}/" + xbeeRemoteID + "/digitalout/" + port + " "  + String(outputValue));
 				} else if (controller == "osc") {
 					theConnection.sendData("/service/osc/reader-writer" + urlString + " " + String(outputValue * multiplier));
 				} else if (controller == "hubFeed") {
 					theConnection.sendData("/service/core/pipe/value " + String(outputValue * multiplier));
-				} else if (controller == "httpGet") {
+				} else if (controller == "iotnREST") {
 					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
 					if (connectionComplete) theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
 				}
@@ -214,7 +208,7 @@
 			sInputSource.text = inputSource;
 			if (controller == "xbee") {
 				sOutputPort.text = controller + " " + xbeeRemoteID + " " + controllerOutputNum;
-			} if (controller == "osc") {
+			} if (controller == "osc" || controller == "iotnREST") {
 				sOutputPort.text = controller + " " + urlString;
 			} else {
 				sOutputPort.text = controller + " " + controllerOutputNum;
@@ -226,7 +220,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,xbee,make,osc,hubFeed", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,iotnREST,xbee,make,osc,hubFeed", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;

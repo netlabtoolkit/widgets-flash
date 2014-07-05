@@ -130,7 +130,7 @@
 				theConnection.sendData("/service/tools/pipe/connect/" + hubFeedName);
 			} else if (controller == "serial") {
 				theConnection.sendData("/service/tools/serial/connect " + serialPort + " " + serialBaudArduinoFirmata);
-			} else if (controller == "httpGet") {
+			} else if (controller == "iotnREST") {
 				hubDeviceName = "";
 				super.finishConnect();
 			}
@@ -170,12 +170,12 @@
 				valueType = "number";
 			}
 			
-			if (controller == "osc" || controller == "hubFeed" || controller == "serial") {
+			if (controller == "osc" || controller == "hubFeed" || controller == "serial" || controller == "iotnREST") {
 				// decide if we should use the multiplier or not
 				if (valueType == "number") {
 					outputValue = String(Number(outputValue) * multiplier);
 				} 
-			} else if (controller == "arduino" || controller == "httpGet") {
+			} else if (controller == "arduino") {
 				outputValue = Math.floor(Number(outputValue)/4); // Arduino permits a PWM range of 0-255
 				outputValue = Math.min(outputValue,255);
 				outputValue = Math.max(0,outputValue);
@@ -197,7 +197,7 @@
 					theConnection.sendData("/service/tools/pipe/send/" + hubFeedName + " " + outputValue);
 				} else if (controller == "serial") {
 					theConnection.sendData("/service/tools/serial/{" + hubDeviceName + "}/write/ " + outputValue);
-				} else if (controller == "httpGet") {
+				} else if (controller == "iotnREST") {
 					//theConnection.sendData("/service/httpclient/reader/get/" + controllerIP + "/arduino/analog/" + controllerOutputNum + "/" + outputValue);
 					var url = "/" + controllerIP + urlString + "/" + controllerOutputNum;
 					theConnection.sendData("/service/httpclient/reader-writer/get" + url + "/" + outputValue + " {} " + url);
@@ -250,10 +250,10 @@
 			super.draw();
 			//trace("in draw");
 			sInputSource.text = inputSource;
-			if (controller == "osc") {
+			if (controller == "osc" || controller == "iotnREST") {
 				sOutputPort.text = controller + " " + urlString;
 			} else if (controller == "hubFeed") {
-				sOutputPort.text = controller;
+				sOutputPort.text = controller + " " + hubFeedName;
 			} else sOutputPort.text = controller + " " + controllerOutputNum;
 		}
 		
@@ -262,7 +262,7 @@
 		// parameter getter setter functions
 
 		private var _controller:String = "arduino";
-		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,httpGet,make,osc,serial,hubFeed", defaultValue="arduino")]
+		[Inspectable (name = "controller", variable = "controller", type = "String", enumeration="arduino,iotnREST,make,osc,serial,hubFeed", defaultValue="arduino")]
 		public function get controller():String { return _controller; }
 		public function set controller(value:String):void {
 			_controller = value;
